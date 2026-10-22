@@ -77,7 +77,8 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return
 function fd(d){return String(d||'').replace('-','. ')}
 function norm(r){return{id:r.id,title:r.title,date:r.date,area:r.area||'',scale:r.scale||'',duration:r.duration||'',situation:r.situation||r.description||'',work:r.work||'',finish:r.finish||'',tags:r.tags||[],img:r.images||[],cap:r.captions||[],before:r.before_img||'',after:r.after_img||'',blog:r.blog_url||''}}
 function load(){return fetch(SB+'/rest/v1/works?select=*&order=date.desc,created_at.desc',{headers:{apikey:KEY}}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(a){W=STATIC.concat(a.map(norm))}).catch(function(){W=STATIC.slice();failed=!W.length}).then(function(){loaded=true;render()})}
-function thumb(e){return e.img[0]?'<img src="'+esc(e.img[0])+'" alt="'+esc(e.title)+'" loading="lazy">':'IMAGE'}
+function cover(e){return e.after||e.img[e.img.length-1]||''}
+function thumb(e){var c=cover(e);return c?'<img src="'+esc(c)+'" alt="'+esc(e.title)+'" loading="lazy">':'IMAGE'}
 function cardHtml(x){return'<a class="card" href="#'+esc(x.id)+'"><div class="th">'+thumb(x)+'</div><div class="cm"><span>'+esc(x.area)+'</span><span>'+fd(x.date)+'</span></div><b>'+esc(x.title)+'</b></a>'}
 function sec(n,t,body,extra){return body?'<div class="sec"><div><small>'+n+'</small><h3>'+t+'</h3></div><div><p>'+esc(body)+'</p>'+(extra||'')+'</div></div>':''}
 function setG(e,i){var n=e.img.length;if(!n)return;gi=(i+n)%n;var m=document.getElementById('gm');m.querySelector('img').src=e.img[gi];document.getElementById('gc').textContent=e.cap[gi]||'';document.getElementById('gn').textContent=('0'+(gi+1)).slice(-2)+' / '+('0'+n).slice(-2);Array.prototype.forEach.call(document.querySelectorAll('.gt button'),function(b,k){b.classList.toggle('on',k===gi)})}
@@ -93,7 +94,7 @@ function detail(e){
  '<div class="cta"><h4>비슷한 현장이신가요?</h4><p>현장 주소와 사진을 보내주시면 담당자가 확인 후 빠르게 연락드립니다.</p><a class="g" href="index.html#contact">무료 견적문의 →</a><a class="w" href="tel:15511888">전화 상담 1551-1888</a><small>상담시간 09:00 - 18:00 (주말·공휴일 휴무)</small></div>'+
  '<div class="note"><b>폐업 예정이신가요?</b>폐업지원금(점포철거비) 신청에 필요한 견적서와 철거 전·후 사진을 함께 준비해 드립니다.<br><a href="index.html#contact">폐업지원금 안내 →</a></div>'+
  (e.blog?'<a class="card2" style="font-size:13px;text-align:center" href="'+esc(e.blog)+'" target="_blank" rel="noopener">블로그에서 자세히 보기 →</a>':'')+'</aside></div>'+
- (nx?'<div class="nx"><a href="works.html">☰ 목록 보기</a><a href="#'+esc(nx.id)+'"><span><small>NEXT</small>'+esc(nx.title)+'</span>'+(nx.img[0]?'<img src="'+esc(nx.img[0])+'" alt="">':'')+'<span>→</span></a></div>':'')+
+ (nx?'<div class="nx"><a href="works.html">☰ 목록 보기</a><a href="#'+esc(nx.id)+'"><span><small>NEXT</small>'+esc(nx.title)+'</span>'+(cover(nx)?'<img src="'+esc(cover(nx))+'" alt="">':'')+'<span>→</span></a></div>':'')+
  (others.length?'<section class="more"><div class="mh"><div><small>MORE WORKS &gt;</small><h2>다른 시공사례</h2></div><a href="works.html">전체 시공사례 보기 →</a></div><div class="slw">'+(others.length>3?'<button type="button" class="ar l" data-s="-1" aria-label="이전">‹</button>':'')+'<div class="sl" id="sl">'+others.map(cardHtml).join('')+'</div>'+(others.length>3?'<button type="button" class="ar r" data-s="1" aria-label="다음">›</button>':'')+'</div></section>':'');
  var r=document.getElementById('br');if(r)r.addEventListener('input',function(){document.getElementById('bb').style.clipPath='inset(0 '+(100-r.value)+'% 0 0)';document.getElementById('bh').style.left=r.value+'%'});
  scrollTo(0,0)}
