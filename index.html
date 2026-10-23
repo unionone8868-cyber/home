@@ -334,7 +334,7 @@ footer .wrap{grid-template-columns:1fr}
    <iframe name="gfr" title="" style="display:none" tabindex="-1" aria-hidden="true"></iframe>
    <form class="ct-form" id="qf" novalidate>
     <label>성함 *<input name="name" placeholder="홍길동" autocomplete="name"></label>
-    <label>연락처 *<input name="phone" type="tel" placeholder="010-0000-0000" autocomplete="tel"></label>
+    <label>연락처 *<input name="phone" type="tel" inputmode="numeric" maxlength="13" placeholder="010-0000-0000" autocomplete="tel"></label>
     <label>철거 유형<select name="type"><option>내부 철거 (인테리어 철거)</option><option>건물/야외 구조물 철거</option><option>원상복구</option><option>폐업지원금</option><option>기타문의</option></select></label>
     <label>현장 주소<input name="addr" placeholder="현장 주소를 입력해주세요"></label>
     <label class="full">문의 내용<textarea name="msg" id="qm" maxlength="500" placeholder="면적, 희망 일정 등을 적어주세요"></textarea><span class="cnt" id="qc">0/500</span></label>
@@ -362,8 +362,9 @@ nav.querySelectorAll('a').forEach(a=>a.onclick=()=>nav.classList.remove('open'))
 
 (function(){var GAS_Q='https://script.google.com/macros/s/AKfycbxGSOUVtQp9NSJXsCyqQ1ckJhiFCmjfKdlpTvchk_FYFmDSn2DDmJoxZ1Xn3s6ZTmm1DA/exec';var f=document.getElementById('qf'),m=document.getElementById('qm'),c=document.getElementById('qc'),g=document.getElementById('qmsg');
 m.addEventListener('input',function(){c.textContent=m.value.length+'/500'});
+f.phone.addEventListener('input',function(){var d=this.value.replace(/\D/g,'').slice(0,11),o=d;if(d.length>7)o=d.slice(0,3)+'-'+d.slice(3,7)+'-'+d.slice(7);else if(d.length>3)o=d.slice(0,3)+'-'+d.slice(3);this.value=o});
 f.addEventListener('submit',function(e){e.preventDefault();var n=f.name.value.trim(),p=f.phone.value.trim();
-if(!n||!p){g.className='msg err';g.textContent='성함과 연락처를 입력해주세요.';(n?f.phone:f.name).focus();return}
+if(!n||!p){g.className='msg err';g.textContent='성함과 연락처를 입력해주세요.';(n?f.phone:f.name).focus();return}if(p.replace(/\D/g,'').length<9){g.className='msg err';g.textContent='연락처를 정확히 입력해주세요.';f.phone.focus();return}
 if(!f.agree.checked){g.className='msg err';g.textContent='개인정보 수집·이용에 동의해주세요.';f.agree.focus();return}
 var b=f.querySelector('.sub');b.disabled=true;b.textContent='전송 중...';
 var data={name:n,phone:p,type:f.type.value,addr:f.addr.value.trim(),msg:f.msg.value.trim()},fr=null;
