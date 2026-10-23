@@ -231,26 +231,11 @@ footer .wrap{grid-template-columns:1fr}
 .ct-info p,.ct-info ul{font-size:clamp(13px,1.4vw,18px)}.ct-info p{white-space:nowrap}.ct-info li{white-space:nowrap}
 @media(max-width:860px){.ct-info p,.ct-info ul{font-size:16px}}@media(max-width:360px){.ct-info p,.ct-info ul{font-size:14px}}
 
-/* ===== 효과 (움직임 줄이기 설정 시 자동 비활성) ===== */
-#prog{position:fixed;top:0;left:0;height:3px;width:100%;background:var(--btn);transform:scaleX(0);transform-origin:left;z-index:80;pointer-events:none}
-header{transition:box-shadow .3s}header.sc{box-shadow:0 4px 18px rgba(0,0,0,.08)}
+/* 메인 이미지 글자 등장 효과 (움직임 줄이기 설정 시 자동 비활성) */
 @media(prefers-reduced-motion:no-preference){
 @keyframes fxUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
-@keyframes fxKb{from{transform:scale(1.12)}to{transform:scale(1)}}
-.slide.on{animation:fxKb 7s ease-out both}
-.hero .eyebrow,.hero h1,.hero .wrap>p:not(.eyebrow),.hero .btn,.hero .pager{animation:fxUp .9s cubic-bezier(.2,.7,.2,1) both}
-.hero .eyebrow{animation-delay:.1s}.hero h1{animation-delay:.25s}.hero .wrap>p:not(.eyebrow){animation-delay:.45s}.hero .btn{animation-delay:.6s}.hero .pager{animation-delay:.75s}
-.chips{animation:fxUp .9s .9s cubic-bezier(.2,.7,.2,1) both}
-.rv{opacity:0;transform:translateY(34px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
-.rv.in{opacity:1;transform:none}
-.work{animation:fxUp .7s cubic-bezier(.2,.7,.2,1) both}.work:nth-child(2){animation-delay:.12s}.work:nth-child(3){animation-delay:.24s}
-.work .ph{transition:transform .5s}.work:hover .ph{transform:scale(1.03)}
-.card{transition:transform .35s,opacity .8s,box-shadow .35s}
-.steps li{transition:transform .3s}.steps li:hover{transform:translateX(8px)}
-.btn,.cm-b1,.cm-b2,.sub,.cta{transition:transform .25s,box-shadow .25s,background .2s}
-.btn:hover,.cm-b1:hover,.sub:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.18)}
-.sns a:hover i{transform:translateY(-4px) scale(1.05)}
-.sns a i{transition:transform .3s,background .2s}
+.hero .eyebrow,.hero h1,.hero .wrap>p:not(.eyebrow),.hero .btn,.hero .pager,.chips{animation:fxUp .9s cubic-bezier(.2,.7,.2,1) both}
+.hero .eyebrow{animation-delay:.1s}.hero h1{animation-delay:.25s}.hero .wrap>p:not(.eyebrow){animation-delay:.45s}.hero .btn{animation-delay:.6s}.hero .pager{animation-delay:.75s}.chips{animation-delay:.9s}
 }
 </style>
 </head>
@@ -406,19 +391,6 @@ function draw(a){if(!a.length)return;g.innerHTML=a.slice(0,3).map(function(x){va
 fetch(SB+'/rest/v1/works?select=id,title,date,images,after_img&order=date.desc,created_at.desc&limit=3',{headers:{apikey:K}}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(a){draw(ST.concat(a))}).catch(function(){draw(ST)});
 })();
 (function(){try{if(new URLSearchParams(location.search).get('type')==='support'){var s=document.querySelector('#qf select[name=type]');if(s)s.value='폐업지원금'}}catch(e){}})();
-</script>
-<div id="prog"></div>
-<script>
-(function(){
-var h=document.querySelector('header'),pr=document.getElementById('prog');
-function sc(){var y=window.pageYOffset||0,m=document.documentElement.scrollHeight-window.innerHeight;if(h)h.classList.toggle('sc',y>8);if(pr&&m>0)pr.style.transform='scaleX('+Math.min(1,y/m)+')'}
-window.addEventListener('scroll',sc,{passive:true});sc();
-try{if(window.matchMedia('(prefers-reduced-motion: reduce)').matches||!('IntersectionObserver' in window))return;
-var sel='.sec-h,.card,.cm-l>div,.cm-ft,.cm-r>h3,.cm-list li,.cm-box,.steps li,.proc-l>*,.ct-top>div,.ct-info,.ct-form';
-var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var t=e.target;t.classList.add('in');io.unobserve(t);setTimeout(function(){t.style.transitionDelay=''},1400)}})},{threshold:.12,rootMargin:'0px 0px -6% 0px'});
-document.querySelectorAll(sel).forEach(function(el){var p=el.parentNode,k=Array.prototype.indexOf.call(p.children,el);el.classList.add('rv');el.style.transitionDelay=(Math.min(k,5)*0.09)+'s';io.observe(el)});
-}catch(x){document.querySelectorAll('.rv').forEach(function(e){e.classList.add('in')})}
-})();
 </script>
 </body>
 </html>

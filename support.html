@@ -78,23 +78,11 @@ footer{background:#000;color:#aaa;font-size:15px;padding:32px 0}footer .wrap{dis
 .cta2 .b1{background:var(--btn);color:#fff}.cta2 .b1:hover{background:var(--btn-d)}
 .cta2 .b2{background:#fff;color:#111;border:1px solid #111}.cta2 .b2:hover{background:#111;color:#fff}
 
-/* ===== 효과 (움직임 줄이기 설정 시 자동 비활성) ===== */
-#prog{position:fixed;top:0;left:0;height:3px;width:100%;background:var(--btn);transform:scaleX(0);transform-origin:left;z-index:80;pointer-events:none}
-header{transition:box-shadow .3s}header.sc{box-shadow:0 4px 18px rgba(0,0,0,.08)}
+/* 숫자 올라가기 + 하단 버튼 두근거림 (움직임 줄이기 설정 시 자동 비활성) */
 @media(prefers-reduced-motion:no-preference){
-@keyframes fxUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
-@keyframes fxPop{from{opacity:0;transform:translateY(30px) scale(.96)}to{opacity:1;transform:none}}
-.hero .eb,.hero h1,.hero .wrap>div:first-child>p:not(.eb){animation:fxUp .9s cubic-bezier(.2,.7,.2,1) both}
-.hero .eb{animation-delay:.1s}.hero h1{animation-delay:.25s}.hero .wrap>div:first-child>p:not(.eb){animation-delay:.45s}
-.amt{animation:fxPop 1s .6s cubic-bezier(.2,.7,.2,1) both}
-.rv{opacity:0;transform:translateY(34px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
-.rv.in{opacity:1;transform:none}
-.box,.chk>div{transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1),box-shadow .3s}
-.box.in:hover,.chk>div.in:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(0,0,0,.12)}
-.steps li{transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
-.steps li.in:hover{transform:translateX(8px)}
-.bigbtn,.cta2 .b{transition:transform .25s,box-shadow .25s,background .2s}
-.bigbtn:hover,.cta2 .b:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.18)}
+@keyframes fxBeat{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(15,138,67,.5)}12%{transform:scale(1.07);box-shadow:0 0 0 0 rgba(15,138,67,.5)}24%{transform:scale(1)}36%{transform:scale(1.045);box-shadow:0 0 0 16px rgba(15,138,67,0)}50%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(15,138,67,0)}}
+.bigbtn.beat{animation:fxBeat 1.8s ease-in-out .6s infinite}
+.bigbtn.beat:hover{animation:none}
 }
 </style>
 </head>
@@ -157,20 +145,14 @@ header{transition:box-shadow .3s}header.sc{box-shadow:0 4px 18px rgba(0,0,0,.08)
 <a class="fab f2" href="index.html?type=support#contact">폐업지원금<br>신청<br>→</a>
 <a class="fab f1" href="index.html#contact">상담문의<br>→</a>
 <script>(function(){var fs=document.querySelectorAll('.fab');if(!fs.length||!('IntersectionObserver' in window))return;var el=document.querySelector('footer');var io=new IntersectionObserver(function(es){es.forEach(function(e){fs.forEach(function(f){f.classList.toggle('hide',e.isIntersecting)})})});io.observe(el)})();</script>
-<div id="prog"></div>
 <script>
-(function(){
-var h=document.querySelector('header'),pr=document.getElementById('prog');
-function sc(){var y=window.pageYOffset||0,m=document.documentElement.scrollHeight-window.innerHeight;if(h)h.classList.toggle('sc',y>8);if(pr&&m>0)pr.style.transform='scaleX('+Math.min(1,y/m)+')'}
-window.addEventListener('scroll',sc,{passive:true});sc();
-try{if(window.matchMedia('(prefers-reduced-motion: reduce)').matches||!('IntersectionObserver' in window))return;
+(function(){try{
+if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
 var n=document.querySelector('.amt strong span');
-if(n){var to=parseInt(n.textContent,10)||0,t0=null;n.textContent='0';setTimeout(function(){function st(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/1400),e=1-Math.pow(1-p,3);n.textContent=Math.round(to*e);if(p<1)requestAnimationFrame(st);else n.textContent=to}requestAnimationFrame(st)},900)}
-var sel='.s h2,.s .sub,.box,.chk>div,.steps li,.docs-sec .docs,.apply .bigbtn,.apply .hint,.cta2 .wrap>*,.fine';
-var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var t=e.target;t.classList.add('in');io.unobserve(t);setTimeout(function(){t.style.transitionDelay=''},1400)}})},{threshold:.12,rootMargin:'0px 0px -6% 0px'});
-document.querySelectorAll(sel).forEach(function(el){var p=el.parentNode,k=Array.prototype.indexOf.call(p.children,el);el.classList.add('rv');el.style.transitionDelay=(Math.min(k,6)*0.09)+'s';io.observe(el)});
-}catch(x){document.querySelectorAll('.rv').forEach(function(e){e.classList.add('in')})}
-})();
+if(n){var to=parseInt(n.textContent,10)||0,t0=null;n.textContent='0';setTimeout(function(){function st(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/1400),e=1-Math.pow(1-p,3);n.textContent=Math.round(to*e);if(p<1)requestAnimationFrame(st);else n.textContent=to}requestAnimationFrame(st)},300)}
+var b=document.querySelector('.bigbtn');
+if(b){if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){b.classList.add('beat');io.disconnect()}})},{threshold:.5});io.observe(b)}else b.classList.add('beat')}
+}catch(x){}})();
 </script>
 </body>
 </html>
