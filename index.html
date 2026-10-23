@@ -323,7 +323,7 @@ footer .wrap{grid-template-columns:1fr}
    <form class="ct-form" id="qf" novalidate>
     <label>성함 *<input name="name" placeholder="홍길동" autocomplete="name"></label>
     <label>연락처 *<input name="phone" type="tel" placeholder="010-0000-0000" autocomplete="tel"></label>
-    <label>철거 유형<select name="type"><option>주거건물 철거</option><option>부분 철거</option><option>업체 철거</option><option>대형건물 철거</option><option>폐업지원금 신청</option></select></label>
+    <label>철거 유형<select name="type"><option>내부 철거 (인테리어 철거)</option><option>건물/야외 구조물 철거</option><option>원상복구</option><option>폐업지원금</option><option>기타문의</option></select></label>
     <label>현장 주소<input name="addr" placeholder="현장 주소를 입력해주세요"></label>
     <label class="full">문의 내용<textarea name="msg" id="qm" maxlength="500" placeholder="면적, 희망 일정 등을 적어주세요"></textarea><span class="cnt" id="qc">0/500</span></label>
     <div class="full agree"><label class="chk"><input type="checkbox" name="agree"><span>[필수] 개인정보 수집·이용에 동의합니다.</span></label>
@@ -367,7 +367,7 @@ var ST=[];
 function draw(a){if(!a.length)return;g.innerHTML=a.slice(0,3).map(function(x){var ia=x.images||[],im=x.after_img||ia[ia.length-1];return'<a class="work" href="works.html#'+e(x.id)+'"><div class="ph">'+(im?'<img src="'+e(im)+'" alt="'+e(x.title)+'" loading="lazy">':'')+'</div><p>'+e(x.title)+'</p><small>'+e(String(x.date||'').replace('-','. '))+'</small></a>'}).join('')}
 fetch(SB+'/rest/v1/works?select=id,title,date,images,after_img&order=date.desc,created_at.desc&limit=3',{headers:{apikey:K}}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(a){draw(ST.concat(a))}).catch(function(){draw(ST)});
 })();
-(function(){try{if(new URLSearchParams(location.search).get('type')==='support'){var s=document.querySelector('#qf select[name=type]');if(s)s.value='폐업지원금 신청'}}catch(e){}})();
+(function(){try{if(new URLSearchParams(location.search).get('type')==='support'){var s=document.querySelector('#qf select[name=type]');if(s)s.value='폐업지원금'}}catch(e){}})();
 </script>
 </body>
 </html>
