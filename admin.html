@@ -43,13 +43,14 @@ var bef='',aft='',app=document.getElementById('app'),who=document.getElementById
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function fd(d){return String(d||'').replace('-','. ')}
 function hdr(j){var h={apikey:KEY,Authorization:'Bearer '+(S?S.access_token:KEY)};if(j)h['Content-Type']='application/json';return h}
-var DAYS=14;
+var DAYS=14,IDLE=60*60*1000;
+function touch(){try{localStorage.setItem('sb_act',String(Date.now()))}catch(e){}}
 function save(){try{if(S)localStorage.setItem('sb_s',JSON.stringify(S));else localStorage.removeItem('sb_s')}catch(e){}}
-function ref(){if(!S||!S.refresh_token)return Promise.reject(new Error('로그인'));return fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:S.refresh_token})}).then(function(r){return r.json().then(function(j){if(!r.ok||!j.access_token)throw new Error('로그인');j.t0=S.t0||Date.now();S=j;save();return j})})}
+function ref(){if(!S||!S.refresh_token)return Promise.reject(new Error('로그인'));return fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:S.refresh_token})}).then(function(r){return r.json().then(function(j){if(!r.ok||!j.access_token)throw new Error('로그인');j.t0=S.t0||Date.now();j.exp=Date.now()+(j.expires_in||3600)*1000;S=j;save();return j})})}
 function api(p,o){o=o||{};o.headers=Object.assign(hdr(!!o.json),o.headers||{});if(o.json){o.body=JSON.stringify(o.json)}return fetch(SB+p,o).then(function(r){if(r.status===401&&!o._r&&S&&S.refresh_token){return ref().then(function(){o._r=1;delete o.headers.Authorization;return api(p,o)})}if(r.status===401||r.status===403)throw new Error('권한이 없거나 로그인이 만료되었습니다. 다시 로그인해 주세요.');if(!r.ok)return r.text().then(function(t){throw new Error(t||'요청 실패')});return r.status===204?null:r.text().then(function(t){return t?JSON.parse(t):null})})}
 function login(e,p){return fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({email:e,password:p})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');return j})})}
 function loginView(){who.textContent='';out.hidden=true;app.innerHTML='<div class="box" style="max-width:420px;margin:40px auto"><h2>관리자 로그인</h2><form id="lf" style="grid-template-columns:1fr"><label>이메일<input type="email" name="e" autocomplete="username" required></label><label>비밀번호<input type="password" name="p" autocomplete="current-password" required></label><p class="msg err" id="lm"></p><button class="b" type="submit">로그인</button></form></div>';
- document.getElementById('lf').onsubmit=function(ev){ev.preventDefault();var f=ev.target,m=document.getElementById('lm');m.textContent='';login(f.e.value.trim(),f.p.value).then(function(j){j.t0=Date.now();S=j;save();main()}).catch(function(x){m.textContent=x.message})}}
+ document.getElementById('lf').onsubmit=function(ev){ev.preventDefault();var f=ev.target,m=document.getElementById('lm');m.textContent='';login(f.e.value.trim(),f.p.value).then(function(j){j.t0=Date.now();j.exp=Date.now()+(j.expires_in||3600)*1000;S=j;save();touch();main()}).catch(function(x){m.textContent=x.message})}}
 function readURL(b){return new Promise(function(ok,no){var r=new FileReader();r.onload=function(){ok(r.result)};r.onerror=no;r.readAsDataURL(b)})}
 function loadImg(src){return new Promise(function(ok,no){var i=new Image();i.onload=function(){ok(i)};i.onerror=no;i.src=src})}
 function heic(file){return new Promise(function(ok,no){var t=setTimeout(function(){no(new Error('timeout'))},90000);function go(){window.heic2any({blob:file,toType:'image/jpeg',quality:.85}).then(function(b){clearTimeout(t);ok(Array.isArray(b)?b[0]:b)},function(e){clearTimeout(t);no(e)})}if(window.heic2any)return go();var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';s.onload=go;s.onerror=function(){clearTimeout(t);no(new Error('load'))};document.head.appendChild(s)})}
@@ -99,10 +100,20 @@ app.addEventListener('click',function(ev){var t=ev.target,d=t.dataset||{};
  if(d.x){if(d.x==='b')bef='';else aft='';drawKeep()}
  if(d.e){edit=d.e;view();scrollTo(0,0)}
  if(d.d&&confirm('이 사례를 삭제할까요? 되돌릴 수 없습니다.')){var x=W.filter(function(w){return w.id===d.d})[0];api('/rest/v1/works?id=eq.'+d.d,{method:'DELETE'}).then(function(){allUrls(x).forEach(function(u){fetch(SB+'/storage/v1/object/'+BUCKET+'/'+fileOf(u),{method:'DELETE',headers:hdr()})});return load()}).then(view).catch(function(e){alert(e.message)})}});
-out.onclick=function(){S=null;try{localStorage.removeItem('sb_s');sessionStorage.removeItem('sb_s')}catch(e){}loginView()};
+function lock(msg){S=null;save();try{localStorage.removeItem('sb_act')}catch(e){}loginView();if(msg){var m=document.getElementById('lm');if(m)m.textContent=msg}}
+out.onclick=function(){lock()};
+function idleOut(){var t=0;try{t=+localStorage.getItem('sb_act')||0}catch(e){}return t>0&&Date.now()-t>IDLE}
+var lt=0;function act(){var n=Date.now();if(S&&n-lt>10000){lt=n;touch()}}
+['mousemove','mousedown','keydown','scroll','touchstart','click','input'].forEach(function(ev){document.addEventListener(ev,act,{passive:true,capture:true})});
+var IDLEMSG='1시간 동안 사용하지 않아 로그아웃되었습니다. 다시 로그인해 주세요.';
 try{S=JSON.parse(localStorage.getItem('sb_s')||'null')}catch(e){}
 if(S&&(!S.t0||Date.now()-S.t0>DAYS*864e5)){S=null;save()}
-if(S){ref().then(main).catch(function(){S=null;save();loginView()});setInterval(function(){if(S)ref().catch(function(){})},20*60*1000)}else loginView();
+if(S&&idleOut()){lock(IDLEMSG)}
+else if(S){
+ touch();
+ if(S.exp&&S.exp-Date.now()>5*60*1000)main();else ref().then(main).catch(function(){lock()});
+}else loginView();
+setInterval(function(){if(!S)return;if(idleOut()){lock(IDLEMSG);return}if(!S.exp||S.exp-Date.now()<10*60*1000)ref().catch(function(){})},30*1000);
 </script>
 </body>
 </html>
