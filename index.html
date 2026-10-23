@@ -348,16 +348,19 @@ const nav=document.getElementById('nav');
 document.getElementById('bg').onclick=()=>nav.classList.toggle('open');
 nav.querySelectorAll('a').forEach(a=>a.onclick=()=>nav.classList.remove('open'));
 
-(function(){var f=document.getElementById('qf'),m=document.getElementById('qm'),c=document.getElementById('qc'),g=document.getElementById('qmsg');
+(function(){var GAS_Q='https://script.google.com/macros/s/AKfycbxGSOUVtQp9NSJXsCyqQ1ckJhiFCmjfKdlpTvchk_FYFmDSn2DDmJoxZ1Xn3s6ZTmm1DA/exec';var f=document.getElementById('qf'),m=document.getElementById('qm'),c=document.getElementById('qc'),g=document.getElementById('qmsg');
 m.addEventListener('input',function(){c.textContent=m.value.length+'/500'});
 f.addEventListener('submit',function(e){e.preventDefault();var n=f.name.value.trim(),p=f.phone.value.trim();
 if(!n||!p){g.className='msg err';g.textContent='성함과 연락처를 입력해주세요.';(n?f.phone:f.name).focus();return}
 if(!f.agree.checked){g.className='msg err';g.textContent='개인정보 수집·이용에 동의해주세요.';f.agree.focus();return}
 var b=f.querySelector('.sub');b.disabled=true;b.textContent='전송 중...';
-var rid=String(Math.random()).slice(2)+Date.now();var fr=document.createElement('form');fr.method='POST';fr.action='https://docs.google.com/forms/d/e/1FAIpQLSflxZbvLh86tyKDNrnSDhNsr6day6OaH4JzUNxsq0E43QAQlg/formResponse';fr.target='gfr';fr.style.display='none';
+var data={name:n,phone:p,type:f.type.value,addr:f.addr.value.trim(),msg:f.msg.value.trim()},fr=null;
+if(GAS_Q){try{fetch(GAS_Q,{method:'POST',mode:'no-cors',keepalive:true,body:new URLSearchParams(data)}).catch(function(){})}catch(x){}}else{
+var rid=String(Math.random()).slice(2)+Date.now();fr=document.createElement('form');fr.method='POST';fr.action='https://docs.google.com/forms/d/e/1FAIpQLSflxZbvLh86tyKDNrnSDhNsr6day6OaH4JzUNxsq0E43QAQlg/formResponse';fr.target='gfr';fr.style.display='none';
 [['entry.813822742',n],['entry.2089105210',p],['entry.202669944',f.type.value],['entry.328870508',f.addr.value.trim()],['entry.356000734',f.msg.value.trim()],['entry.3370767','동의합니다.'],['entry.3370767_sentinel',''],['fvv','1'],['pageHistory','0'],['fbzx',rid],['draftResponse','[null,null,"'+rid+'"]'],['partialResponse','[null,null,"'+rid+'"]']].forEach(function(kv){var i=document.createElement('input');i.type='hidden';i.name=kv[0];i.value=kv[1];fr.appendChild(i)});
 document.body.appendChild(fr);fr.submit();
-setTimeout(function(){fr.remove();g.className='msg ok';g.textContent='견적 요청이 접수되었습니다. 담당자가 확인 후 연락드리겠습니다.';f.reset();c.textContent='0/500';b.disabled=false;b.textContent='견적 요청하기'},1500);})})();
+}
+setTimeout(function(){if(fr)fr.remove();g.className='msg ok';g.textContent='견적 요청이 접수되었습니다. 담당자가 확인 후 연락드리겠습니다.';f.reset();c.textContent='0/500';b.disabled=false;b.textContent='견적 요청하기'},1500);})})();
 (function(){var cs=document.querySelectorAll('.cta');if(!cs.length||!('IntersectionObserver' in window))return;var v=new Set();var io=new IntersectionObserver(function(es){es.forEach(function(e){e.isIntersecting?v.add(e.target):v.delete(e.target)});cs.forEach(function(c){c.classList.toggle('hide',v.size>0)})});['#contact','footer'].forEach(function(s){io.observe(document.querySelector(s))})})();
 (function(){var b=document.getElementById('prepBtn'),p=document.getElementById('prep');if(!b)return;b.addEventListener('click',function(){var o=p.classList.toggle('open');b.setAttribute('aria-expanded',o);b.lastElementChild.textContent=o?'−':'+'})})();
 (function(){var s=document.querySelectorAll('.slide'),pg=document.getElementById('pg'),pn=document.getElementById('pn'),i=0,t;if(!s.length)return;function go(n){s[i].classList.remove('on');i=(n+s.length)%s.length;s[i].classList.add('on');pn.textContent='0'+(i+1);pg.classList.remove('go');void pg.offsetWidth;pg.classList.add('go')}function start(){clearInterval(t);t=setInterval(function(){go(i+1)},5000)}pg.addEventListener('click',function(){go(i+1);start()});if(!matchMedia('(prefers-reduced-motion: reduce)').matches){pg.classList.add('go');start()}})();
