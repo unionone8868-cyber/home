@@ -57,6 +57,17 @@ footer{background:#000;color:#aaa;font-size:12px;padding:32px 0}footer .wrap{dis
 .fab.f2{bottom:calc(24px + 96px + 12px + env(safe-area-inset-bottom,0px));background:var(--btn);font-size:13px;line-height:1.35;letter-spacing:-.02em}.fab.f2:hover{background:var(--btn-d)}
 .fab.hide{opacity:0;pointer-events:none;transform:translateY(12px)}
 @media(max-width:560px){.fab{width:76px;height:76px;font-size:13px;right:14px}.fab.f1{bottom:calc(16px + env(safe-area-inset-bottom,0px))}.fab.f2{bottom:calc(16px + 76px + 10px + env(safe-area-inset-bottom,0px));font-size:11px}}
+
+/* 진행 절차 / 준비할 서류 글씨 1.5배 */
+.proc .sub,.docs-sec .sub{font-size:22px}
+.steps li::before{top:45px}
+.steps i{width:90px;height:90px;font-size:27px;margin-bottom:18px}.steps i small{font-size:15px;margin-top:-8px}
+.steps b{font-size:22px;margin-bottom:4px}.steps span{font-size:19px}
+.docs-sec .box{padding:36px 34px}.docs-sec .box small{font-size:18px;margin-bottom:12px}.docs-sec .box h3{font-size:27px;margin-bottom:12px}
+.docs-sec .docs .box ul{font-size:21px;line-height:2;padding-left:26px}
+.docs-sec .warn{font-size:21px;padding:24px 30px}
+@media(max-width:960px){.steps li{grid-template-columns:90px 1fr}.steps b{font-size:20px}.steps span{font-size:17px}.proc .sub,.docs-sec .sub{font-size:18px}.docs-sec .box h3{font-size:23px}.docs-sec .docs .box ul,.docs-sec .warn{font-size:18px}.docs-sec .box small{font-size:15px}}
+@media(max-width:560px){.steps i{width:72px;height:72px;font-size:22px}.steps li{grid-template-columns:72px 1fr}.docs-sec .box{padding:26px 22px}}
 </style>
 </head>
 <body>
@@ -87,7 +98,7 @@ footer{background:#000;color:#aaa;font-size:12px;padding:32px 0}footer .wrap{dis
   <div><h3>직접 철거한 경우</h3><p>사업자등록된 철거업체가 아니라 본인이 직접 철거하고 비용을 청구하는 경우</p></div>
  </div></div></section>
 
-<section class="s"><div class="wrap"><h2>진행 절차 안내</h2><p class="sub">지원사업 신청 후 철거업체가 철거하고, 비용은 공단에서 심사를 거쳐 지급하는 구조입니다.</p>
+<section class="s proc"><div class="wrap"><h2>진행 절차 안내</h2><p class="sub">지원사업 신청 후 철거업체가 철거하고, 비용은 공단에서 심사를 거쳐 지급하는 구조입니다.</p>
  <ol class="steps">
   <li><i>1<small>Step</small></i><b>지원사업 신청</b><span>신청인</span></li>
   <li><i>2<small>Step</small></i><b>신청서류 검토</b><span>공단</span></li>
@@ -98,7 +109,7 @@ footer{background:#000;color:#aaa;font-size:12px;padding:32px 0}footer .wrap{dis
   <li><i>7<small>Step</small></i><b>현장 점검</b><span>공단</span></li>
  </ol></div></section>
 
-<section class="s" style="background:var(--surface)"><div class="wrap"><h2>준비할 서류</h2><p class="sub">철거 전후 사진과 증빙을 빠짐없이 남겨 두는 것이 중요합니다.</p>
+<section class="s docs-sec" style="background:var(--surface)"><div class="wrap"><h2>준비할 서류</h2><p class="sub">철거 전후 사진과 증빙을 빠짐없이 남겨 두는 것이 중요합니다.</p>
  <div class="docs">
   <div class="box"><small>신청할 때</small><h3>신청 서류</h3><ul><li>신청서와 체크리스트, 개인정보 제공 동의서</li><li>사업자등록증 또는 폐업사실증명원</li><li>임대차계약서, 건축물대장</li><li>철거업체 견적서</li></ul></div>
   <div class="box"><small>철거를 마친 뒤</small><h3>정산 서류</h3><ul><li>전자세금계산서 또는 카드 영수증</li><li>계좌이체·카드결제 확인서</li><li>철거 전·후 사진</li></ul></div>
