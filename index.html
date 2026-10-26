@@ -237,6 +237,10 @@ footer .wrap{grid-template-columns:1fr}
 .hero .eyebrow,.hero h1,.hero .wrap>p:not(.eyebrow),.hero .btn,.hero .pager,.chips{animation:fxUp .9s cubic-bezier(.2,.7,.2,1) both}
 .hero .eyebrow{animation-delay:.1s}.hero h1{animation-delay:.25s}.hero .wrap>p:not(.eyebrow){animation-delay:.45s}.hero .btn{animation-delay:.6s}.hero .pager{animation-delay:.75s}.chips{animation-delay:.9s}
 }
+
+.ct-form .addr{display:grid;gap:8px}.ct-form .ar{display:flex;gap:8px}.ct-form .ar input{flex:1;min-width:0;cursor:pointer}
+.asb{flex:none;background:var(--btn);color:#fff;border:0;border-radius:3px;padding:0 22px;font:inherit;font-size:19px;font-weight:500;cursor:pointer;transition:.2s;white-space:nowrap}.asb:hover{background:var(--btn-d)}
+@media(max-width:560px){.asb{padding:0 14px;font-size:17px}}
 </style>
 </head>
 <body>
@@ -342,8 +346,8 @@ footer .wrap{grid-template-columns:1fr}
    <form class="ct-form" id="qf" novalidate>
     <label>성함 *<input name="name" placeholder="홍길동" autocomplete="name"></label>
     <label>연락처 *<input name="phone" type="tel" inputmode="numeric" maxlength="13" placeholder="010-0000-0000" autocomplete="tel"></label>
-    <label>철거 유형<select name="type"><option>내부 철거 (인테리어 철거)</option><option>건물/야외 구조물 철거</option><option>원상복구</option><option>폐업지원금</option><option>기타문의</option></select></label>
-    <label>현장 주소<input name="addr" placeholder="현장 주소를 입력해주세요"></label>
+    <label class="full">철거 유형<select name="type"><option>내부 철거 (인테리어 철거)</option><option>건물/야외 구조물 철거</option><option>원상복구</option><option>폐업지원금</option><option>기타문의</option></select></label>
+    <div class="full addr"><label>현장 주소 *<span class="ar"><input name="addr" readonly placeholder="주소검색 버튼을 눌러주세요" autocomplete="off"><button type="button" class="asb" id="asb">주소검색</button></span></label><input name="addr2" placeholder="상세주소 (동·호수 등)" autocomplete="off"></div>
     <label class="full">문의 내용<textarea name="msg" id="qm" maxlength="500" placeholder="면적, 희망 일정 등을 적어주세요"></textarea><span class="cnt" id="qc">0/500</span></label>
     <div class="full agree"><label class="chk"><input type="checkbox" name="agree"><span>[필수] 개인정보 수집·이용에 동의합니다.</span></label>
      <details><summary>내용 보기</summary><ul><li>수집 항목: 성함, 연락처, 철거 유형, 현장 주소, 문의 내용</li><li>이용 목적: 견적 상담 및 회신</li><li>보유 기간: 상담 목적 달성 후 지체 없이 파기 (관계 법령에 따라 보관이 필요한 경우 해당 기간 보관)</li><li>동의를 거부할 수 있으며, 거부 시 견적 문의 접수가 제한됩니다.</li></ul></details></div>
@@ -370,14 +374,17 @@ nav.querySelectorAll('a').forEach(a=>a.onclick=()=>nav.classList.remove('open'))
 (function(){var GAS_Q='https://script.google.com/macros/s/AKfycbxGSOUVtQp9NSJXsCyqQ1ckJhiFCmjfKdlpTvchk_FYFmDSn2DDmJoxZ1Xn3s6ZTmm1DA/exec';var f=document.getElementById('qf'),m=document.getElementById('qm'),c=document.getElementById('qc'),g=document.getElementById('qmsg');
 m.addEventListener('input',function(){c.textContent=m.value.length+'/500'});
 f.phone.addEventListener('input',function(){var d=this.value.replace(/[０-９]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-65248)}).replace(/\D/g,'').slice(0,11),o=d;if(d.length>7)o=d.slice(0,3)+'-'+d.slice(3,7)+'-'+d.slice(7);else if(d.length>3)o=d.slice(0,3)+'-'+d.slice(3);this.value=o});
+var ab=document.getElementById('asb');function pc(){if(window.daum&&daum.Postcode){new daum.Postcode({oncomplete:function(d){var a=d.roadAddress||d.jibunAddress;f.addr.value=(d.zonecode?'('+d.zonecode+') ':'')+a;f.addr2.focus()}}).open()}else{f.addr.removeAttribute('readonly');f.addr.placeholder='현장 주소를 입력해주세요';f.addr.focus()}}
+ab.addEventListener('click',pc);f.addr.addEventListener('click',function(){if(f.addr.readOnly)pc()});
 f.addEventListener('submit',function(e){e.preventDefault();var n=f.name.value.trim(),p=f.phone.value.trim();
 if(!n||!p){g.className='msg err';g.textContent='성함과 연락처를 입력해주세요.';(n?f.phone:f.name).focus();return}if(p.replace(/\D/g,'').length<9){g.className='msg err';g.textContent='연락처를 정확히 입력해주세요.';f.phone.focus();return}
+if(!f.addr.value.trim()){g.className='msg err';g.textContent='현장 주소를 검색해서 입력해주세요.';ab.focus();return}
 if(!f.agree.checked){g.className='msg err';g.textContent='개인정보 수집·이용에 동의해주세요.';f.agree.focus();return}
 var b=f.querySelector('.sub');b.disabled=true;b.textContent='전송 중...';
-var data={name:n,phone:p,type:f.type.value,addr:f.addr.value.trim(),msg:f.msg.value.trim()},fr=null;
+var ad=(f.addr.value.trim()+' '+f.addr2.value.trim()).trim();var data={name:n,phone:p,type:f.type.value,addr:ad,msg:f.msg.value.trim()},fr=null;
 if(GAS_Q){try{fetch(GAS_Q,{method:'POST',mode:'no-cors',keepalive:true,body:new URLSearchParams(data)}).catch(function(){})}catch(x){}}else{
 var rid=String(Math.random()).slice(2)+Date.now();fr=document.createElement('form');fr.method='POST';fr.action='https://docs.google.com/forms/d/e/1FAIpQLSflxZbvLh86tyKDNrnSDhNsr6day6OaH4JzUNxsq0E43QAQlg/formResponse';fr.target='gfr';fr.style.display='none';
-[['entry.813822742',n],['entry.2089105210',p],['entry.202669944',f.type.value],['entry.328870508',f.addr.value.trim()],['entry.356000734',f.msg.value.trim()],['entry.3370767','동의합니다.'],['entry.3370767_sentinel',''],['fvv','1'],['pageHistory','0'],['fbzx',rid],['draftResponse','[null,null,"'+rid+'"]'],['partialResponse','[null,null,"'+rid+'"]']].forEach(function(kv){var i=document.createElement('input');i.type='hidden';i.name=kv[0];i.value=kv[1];fr.appendChild(i)});
+[['entry.813822742',n],['entry.2089105210',p],['entry.202669944',f.type.value],['entry.328870508',ad],['entry.356000734',f.msg.value.trim()],['entry.3370767','동의합니다.'],['entry.3370767_sentinel',''],['fvv','1'],['pageHistory','0'],['fbzx',rid],['draftResponse','[null,null,"'+rid+'"]'],['partialResponse','[null,null,"'+rid+'"]']].forEach(function(kv){var i=document.createElement('input');i.type='hidden';i.name=kv[0];i.value=kv[1];fr.appendChild(i)});
 document.body.appendChild(fr);fr.submit();
 }
 setTimeout(function(){if(fr)fr.remove();g.className='msg ok';g.textContent='견적 요청이 접수되었습니다. 담당자가 확인 후 연락드리겠습니다.';f.reset();c.textContent='0/500';b.disabled=false;b.textContent='견적 요청하기'},1500);})})();
@@ -392,5 +399,6 @@ fetch(SB+'/rest/v1/works?select=id,title,date,images,after_img&order=date.desc,c
 })();
 (function(){try{if(new URLSearchParams(location.search).get('type')==='support'){var s=document.querySelector('#qf select[name=type]');if(s)s.value='폐업지원금'}}catch(e){}})();
 </script>
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" async></script>
 </body>
 </html>
