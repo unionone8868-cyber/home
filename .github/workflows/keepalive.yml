@@ -1,10 +1,14 @@
 name: Supabase keepalive
 
 # 매일 한 번 Supabase에 접속해서 무료 플랜 휴면(1주일 무활동 정지)을 막습니다.
+# 또한 이 작업 자체가 60일 자동정지 되지 않도록 스스로 연장합니다.
 on:
   schedule:
-    - cron: '17 21 * * *'   # 매일 한국시간 오전 6시 17분
+    - cron: '17 21 * * *'   # 매일 한국시간 오전 6시 17분 (GitHub는 UTC 기준)
   workflow_dispatch: {}      # Actions 화면에서 수동 실행 가능
+
+permissions:
+  actions: write
 
 jobs:
   ping:
@@ -17,3 +21,9 @@ jobs:
             -H "apikey: sb_publishable_lVeG6D5K9hfBPAXslcmS-A_czitMljh")
           echo "Supabase response: $code"
           test "$code" = "200"
+
+      - name: Keep workflow enabled
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT repos/${{ github.repository }}/actions/workflows/keepalive.yml/enable
