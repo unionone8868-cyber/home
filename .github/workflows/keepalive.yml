@@ -1,7 +1,7 @@
 name: Supabase keepalive
 
-# 매일 한 번 Supabase에 접속해서 무료 플랜 휴면(1주일 무활동 정지)을 막습니다.
-# 또한 이 작업 자체가 60일 자동정지 되지 않도록 스스로 연장합니다.
+# 매일 한 번: ① Supabase 접속(무료 플랜 휴면 방지) ② 실제 홈페이지 점검 ③ 이 작업의 60일 자동정지 방지
+# 이상이 있으면 이 작업이 '실패'로 표시되고 GitHub가 메일로 알려줍니다.
 on:
   schedule:
     - cron: '17 21 * * *'   # 매일 한국시간 오전 6시 17분 (GitHub는 UTC 기준)
@@ -16,11 +16,28 @@ jobs:
     steps:
       - name: Ping Supabase
         run: |
-          code=$(curl -s -o /dev/null -w "%{http_code}" \
+          body=$(curl -s -w "\n%{http_code}" \
             "https://lztrbyfisyfqtmyysmyt.supabase.co/rest/v1/works?select=id&limit=1" \
             -H "apikey: sb_publishable_lVeG6D5K9hfBPAXslcmS-A_czitMljh")
+          code=$(echo "$body" | tail -1)
           echo "Supabase response: $code"
           test "$code" = "200"
+
+      - name: Check live site
+        if: always()
+        run: |
+          fail=0
+          for u in https://unionone.co.kr/ https://www.unionone.co.kr/ https://unionone.co.kr/works.html https://unionone.co.kr/support.html; do
+            code=$(curl -s -o /tmp/p.html -w "%{http_code}" -L --max-time 30 "$u")
+            if [ "$code" != "200" ]; then echo "FAIL $u -> $code"; fail=1; continue; fi
+            if ! grep -q "유니온원" /tmp/p.html; then echo "FAIL $u : 페이지 내용 이상"; fail=1; continue; fi
+            echo "OK   $u"
+          done
+          # HTTPS 인증서 만료일 (14일 미만이면 경고)
+          if ! echo | openssl s_client -connect unionone.co.kr:443 -servername unionone.co.kr 2>/dev/null | openssl x509 -noout -checkend $((14*86400)); then
+            echo "FAIL 인증서가 14일 안에 만료되거나 확인 불가"; fail=1
+          fi
+          exit $fail
 
       - name: Keep workflow enabled
         if: always()
