@@ -29,6 +29,7 @@ textarea{min-height:110px}input:focus,textarea:focus{outline:2px solid var(--btn
 .msg{font-size:13px;min-height:20px}.msg.err{color:#c33}.msg.ok{color:var(--btn)}
 .imgs{display:flex;gap:10px;flex-wrap:wrap}.imgs div{position:relative;width:96px;height:72px;border-radius:3px;overflow:hidden;background:#ddd}
 .imgs img{width:100%;height:100%;object-fit:cover}.imgs button{position:absolute;top:3px;right:3px;width:22px;height:22px;border:0;border-radius:50%;background:rgba(0,0,0,.7);color:#fff;cursor:pointer}
+.kimgs{display:flex;gap:12px;flex-wrap:wrap}.kimgs figure{width:96px;display:grid;gap:5px;margin:0}.kimgs .th{position:relative;width:96px;height:72px;border-radius:3px;overflow:hidden;background:#ddd;cursor:grab}.kimgs .th img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}.kimgs .x{position:absolute;top:3px;right:3px;width:22px;height:22px;border:0;border-radius:50%;background:rgba(0,0,0,.7);color:#fff;cursor:pointer}.kimgs .n{position:absolute;left:3px;top:3px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--btn);color:#fff;font-size:11px;line-height:20px;text-align:center}.kimgs .mv{display:flex;gap:4px}.kimgs .mv button{flex:1;height:34px;border:1px solid var(--line);background:var(--surface);border-radius:3px;cursor:pointer;font-size:14px;color:var(--text)}.kimgs .mv button:disabled{opacity:.3;cursor:default}.kimgs figure.dg{opacity:.4}.kimgs figure.ov .th{outline:2px solid var(--btn)}.hint{font-size:12px;color:var(--muted);margin:2px 0 8px}
 table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:12px 8px;border-bottom:1px solid var(--line)}th{font-size:12px;color:var(--muted);font-weight:400}
 td.t{display:flex;align-items:center;gap:12px}td.t img,td.t i{width:56px;height:42px;object-fit:cover;border-radius:3px;background:#ddd;flex:none}
 @media(max-width:600px){form{grid-template-columns:1fr}}
@@ -74,7 +75,7 @@ function view(){
  area('work','작업 내용',e&&e.work,'어떤 순서로 작업했는지 적어 주세요')+
  fld('tags','작업 태그 (쉼표로 구분)',e&&(e.tags||[]).join(', '),'예) 주방설비 철거, 원상복구, 폐기물 반출',1)+
  area('finish','마무리',e&&e.finish,'마무리 상태와 안내사항')+
- '<div class="full"><b style="font-size:12px;font-weight:400">현재 등록된 사진</b><div class="imgs" id="ki"></div></div>'+
+ '<div class="full"><b style="font-size:12px;font-weight:400">현재 등록된 사진</b><p class="hint">◀ ▶ 버튼이나 사진을 끌어서 순서를 바꿀 수 있습니다. 1번 사진이 대표 사진입니다. 사진 설명도 사진과 함께 움직입니다.</p><div class="kimgs" id="ki"></div></div>'+
  '<label class="full">사진 추가 (여러 장 선택 가능, 선택한 순서대로 뒤에 추가됩니다)<input type="file" name="imgs" accept="image/*" multiple></label>'+
  area('captions','사진 설명 (한 줄에 하나씩, 사진 순서대로)',e&&(e.captions||[]).join('\n'),'철거 전\n철거 중\n철거 중\n철거 후')+
  '<div class="full"><b style="font-size:12px;font-weight:400">철거 전 · 후 비교 사진 (선택)</b><div class="imgs" id="ba"></div></div>'+
@@ -94,9 +95,18 @@ function view(){
    return(e?api('/rest/v1/works?id=eq.'+e.id,{method:'PATCH',json:row}):api('/rest/v1/works',{method:'POST',json:row,headers:{Prefer:'return=minimal'}})).then(function(){allUrls(e).filter(function(u){return keepAll.indexOf(u)<0}).forEach(function(u){fetch(SB+'/storage/v1/object/'+BUCKET+'/'+fileOf(u),{method:'DELETE',headers:hdr()})})})
   }).then(function(){edit=null;return load()}).then(function(){view();var mm=document.getElementById('wm');mm.className='msg full ok';mm.textContent='저장되었습니다.'}).catch(function(x){b.disabled=false;m.className='msg full err';m.textContent=/column|schema/i.test(x.message)?'데이터베이스에 새 항목이 아직 없습니다. 안내드린 SQL(항목 추가)을 먼저 실행해 주세요.':x.message})}
 }
-function drawKeep(){var k=document.getElementById('ki');if(k)k.innerHTML=keep.map(function(u,i){return'<div><img src="'+esc(u)+'" alt=""><button type="button" data-k="'+i+'" aria-label="사진 삭제">×</button></div>'}).join('')||'<span class="sub" style="margin:0">없음</span>';var a=document.getElementById('ba');if(a)a.innerHTML=(bef?'<div><img src="'+esc(bef)+'" alt=""><button type="button" data-x="b" aria-label="삭제">×</button></div>':'')+(aft?'<div><img src="'+esc(aft)+'" alt=""><button type="button" data-x="a" aria-label="삭제">×</button></div>':'')}
+function drawKeep(){var k=document.getElementById('ki');if(k)k.innerHTML=keep.map(function(u,i){return'<figure draggable="true" data-i="'+i+'"><div class="th"><img src="'+esc(u)+'" alt=""><span class="n">'+(i+1)+'</span><button type="button" class="x" data-k="'+i+'" aria-label="사진 삭제">×</button></div><div class="mv"><button type="button" data-mv="'+i+'" data-dir="-1" aria-label="앞으로"'+(i===0?' disabled':'')+'>◀</button><button type="button" data-mv="'+i+'" data-dir="1" aria-label="뒤로"'+(i===keep.length-1?' disabled':'')+'>▶</button></div></figure>'}).join('')||'<span class="sub" style="margin:0">없음</span>';var a=document.getElementById('ba');if(a)a.innerHTML=(bef?'<div><img src="'+esc(bef)+'" alt=""><button type="button" data-x="b" aria-label="삭제">×</button></div>':'')+(aft?'<div><img src="'+esc(aft)+'" alt=""><button type="button" data-x="a" aria-label="삭제">×</button></div>':'')}
+function caps(){var f=document.getElementById('wf'),c=f.captions.value.split('\n');while(c.length<keep.length)c.push('');return c}
+function setCaps(c){document.getElementById('wf').captions.value=c.join('\n')}
+function mvKeep(i,j){if(isNaN(i)||isNaN(j)||j<0||j>=keep.length||i===j)return;var c=caps(),p=keep.splice(i,1)[0],q=c.splice(i,1)[0];keep.splice(j,0,p);c.splice(j,0,q);setCaps(c);drawKeep()}
+var dragI=null;
+app.addEventListener('dragstart',function(ev){var g=ev.target.closest&&ev.target.closest('#ki figure');if(!g)return;dragI=Number(g.dataset.i);g.classList.add('dg');try{ev.dataTransfer.effectAllowed='move';ev.dataTransfer.setData('text/plain',String(dragI))}catch(e){}});
+app.addEventListener('dragover',function(ev){var g=ev.target.closest&&ev.target.closest('#ki figure');if(g&&dragI!==null){ev.preventDefault();Array.prototype.forEach.call(document.querySelectorAll('#ki figure.ov'),function(x){x.classList.remove('ov')});g.classList.add('ov')}});
+app.addEventListener('drop',function(ev){var g=ev.target.closest&&ev.target.closest('#ki figure');if(g&&dragI!==null){ev.preventDefault();var i=dragI;dragI=null;mvKeep(i,Number(g.dataset.i))}});
+app.addEventListener('dragend',function(){dragI=null;drawKeep()});
 app.addEventListener('click',function(ev){var t=ev.target,d=t.dataset||{};
- if(d.k!==undefined){keep.splice(Number(d.k),1);drawKeep()}
+ if(d.mv!==undefined){mvKeep(Number(d.mv),Number(d.mv)+Number(d.dir))}
+ if(d.k!==undefined){var c=caps();c.splice(Number(d.k),1);setCaps(c);keep.splice(Number(d.k),1);drawKeep()}
  if(d.x){if(d.x==='b')bef='';else aft='';drawKeep()}
  if(d.e){edit=d.e;view();scrollTo(0,0)}
  if(d.d&&confirm('이 사례를 삭제할까요? 되돌릴 수 없습니다.')){var x=W.filter(function(w){return w.id===d.d})[0];api('/rest/v1/works?id=eq.'+d.d,{method:'DELETE'}).then(function(){allUrls(x).forEach(function(u){fetch(SB+'/storage/v1/object/'+BUCKET+'/'+fileOf(u),{method:'DELETE',headers:hdr()})});return load()}).then(view).catch(function(e){alert(e.message)})}});
